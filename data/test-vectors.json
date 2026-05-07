@@ -1,0 +1,30 @@
+[
+  {
+    "id": "TC-0001",
+    "input_cqn": "tuyết",
+    "expected_cvss": "tydb",
+    "profile": "canonical",
+    "notes": "Vần uyêt → yd, sắc+nón → b"
+  },
+  {
+    "id": "TC-0002",
+    "input_cqn": "nguyễn",
+    "expected_cvss": "wylg",
+    "profile": "canonical",
+    "notes": "ng/ngh → w, uyên → yl, ngã+nón → g"
+  },
+  {
+    "id": "TC-0003",
+    "input_cqn": "xoay",
+    "expected_cvss": "xajp",
+    "profile": "canonical",
+    "notes": "Ký hiệu P chống nhập nhằng thanh ngang"
+  },
+  {
+    "id": "TC-0004",
+    "input_cqn": "Qua phà nghiêng ngó lồng gà",
+    "expected_cvss": "Qa fal wizy woj logd gal",
+    "profile": "canonical",
+    "notes": "Câu ví dụ trong tài liệu công thức CVNSS4.0"
+  }
+]

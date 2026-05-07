@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CVNSS4.0 Codec/IR Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f6f7fb; color: #111827; }
+    header { padding: 28px; background: #111827; color: white; }
+    main { max-width: 1100px; margin: 24px auto; padding: 0 16px; display: grid; gap: 16px; }
+    .card { background: white; border-radius: 18px; padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+    textarea { width: 100%; min-height: 140px; font-size: 16px; padding: 12px; border: 1px solid #d1d5db; border-radius: 12px; box-sizing: border-box; }
+    select, button { padding: 10px 12px; border-radius: 10px; border: 1px solid #d1d5db; font-size: 15px; }
+    button { cursor: pointer; background: #111827; color: white; }
+    pre { background: #0b1020; color: #d1e7ff; padding: 14px; border-radius: 12px; overflow: auto; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CVNSS4.0 Codec/IR Demo</h1>
+    <p>CQN → CVNSS → IR metadata / ID / audit hash</p>
+  </header>
+  <main>
+    <section class="card">
+      <label for="input"><strong>Văn bản CQN / CVNSS</strong></label>
+      <textarea id="input">Qua phà nghiêng ngó lồng gà
+Tránh quẹt thúng ghẹ người ta đứng gần</textarea>
+      <p>
+        <select id="mode">
+          <option value="encode">Encode CQN → CVNSS</option>
+          <option value="decode">Decode CVNSS → CQN</option>
+          <option value="ir">IR / NLP tokens</option>
+          <option value="id">CVNSS-ID</option>
+          <option value="audit">Audit record</option>
+        </select>
+        <select id="profile">
+          <option value="canonical">canonical</option>
+          <option value="user">user</option>
+          <option value="nlp">nlp</option>
+          <option value="id">id</option>
+          <option value="secure">secure</option>
+          <option value="compact">compact</option>
+          <option value="verbose">verbose</option>
+        </select>
+        <button id="run">Chạy</button>
+      </p>
+    </section>
+    <section class="grid">
+      <div class="card">
+        <h2>Output</h2>
+        <pre id="output"></pre>
+      </div>
+      <div class="card">
+        <h2>Metadata</h2>
+        <pre id="meta"></pre>
+      </div>
+    </section>
+  </main>
+  <script src="../src/legacy/cvnss4-converter.js"></script>
+  <script>
+    const MARKERS = {
+      b:['circumflex','sac','hat'], d:['circumflex','huyen','hat'], q:['circumflex','hoi','hat'], g:['circumflex','nga','hat'], f:['circumflex','nang','hat'],
+      x:['breve_or_horn','sac','breve_or_horn'], k:['breve_or_horn','huyen','breve_or_horn'], v:['breve_or_horn','hoi','breve_or_horn'], w:['breve_or_horn','nga','breve_or_horn'], h:['breve_or_horn','nang','breve_or_horn'],
+      j:['plain_vowel','sac','none'], l:['plain_vowel','huyen','none'], z:['plain_vowel','hoi','none'], s:['plain_vowel','nga','none'], r:['plain_vowel','nang','none'],
+      y:['level','ngang','hat'], o:['level','ngang','breve_or_horn'], p:['level_guard','ngang','none']
+    };
+    function analyze(token) {
+      const last = token[token.length - 1]?.toLowerCase();
+      const m = MARKERS[last];
+      return m ? { stem: token.slice(0,-1), marker: last, group: m[0], tone: m[1], diacritic: m[2] } : { stem: token, marker: null };
+    }
+    async function sha256(text) {
+      const data = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    function words(text) { return text.match(/[A-Za-zÀ-ỹĐđ]+|\s+|./gu) || []; }
+    document.getElementById('run').onclick = async () => {
+      const input = document.getElementById('input').value.normalize('NFC');
+      const mode = document.getElementById('mode').value;
+      let result, meta;
+      if (mode === 'encode') {
+        const converted = CVNSSConverter.convert(input, 'cqn');
+        result = converted.cvss;
+        meta = { stats: { inputChars: input.length, outputChars: result.length }, profile: document.getElementById('profile').value };
+      } else if (mode === 'decode') {
+        const converted = CVNSSConverter.convert(input, 'cvss');
+        result = converted.cqn;
+        meta = { stats: { inputChars: input.length, outputChars: result.length } };
+      } else if (mode === 'ir') {
+        const converted = CVNSSConverter.convert(input, 'cqn').cvss;
+        result = converted;
+        meta = words(converted).map((t, i) => /^[A-Za-z]+$/.test(t) ? ({ index: i, cvss: t, ...analyze(t) }) : ({ index: i, raw: t }));
+      } else if (mode === 'id') {
+        const canonical = CVNSSConverter.convert(input, 'cqn').cvss;
+        const hash = (await sha256(canonical)).slice(0, 12).toUpperCase();
+        result = 'CV40-' + canonical.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '').toUpperCase().slice(0, 48) + '-' + hash;
+        meta = { canonical, hash };
+      } else {
+        const canonical = CVNSSConverter.convert(input, 'cqn').cvss;
+        const hash = await sha256(canonical);
+        result = canonical;
+        meta = { type: 'cvnss40.audit.v1', sha256: hash, timestamp: new Date().toISOString() };
+      }
+      document.getElementById('output').textContent = result;
+      document.getElementById('meta').textContent = JSON.stringify(meta, null, 2);
+    };
+    document.getElementById('run').click();
+  </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "name": "cvnss40-codec",
+  "version": "0.1.0",
+  "description": "CVNSS4.0 Vietnamese codec/IR reference implementation: CQN ↔ CVNSS with stem + KHD + metadata profiles for NLP, ID, GIS, RFID and audit logs.",
+  "main": "src/index.js",
+  "bin": {
+    "cvnss40": "bin/cvnss40.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "demo": "node examples/basic.js",
+    "lint:smoke": "node -c src/index.js && node -c bin/cvnss40.js",
+    "serve": "node server/http-server.js"
+  },
+  "keywords": [
+    "cvnss",
+    "cvnss4",
+    "vietnamese",
+    "codec",
+    "ir",
+    "nlp",
+    "rfid",
+    "qr",
+    "nfc",
+    "gis",
+    "digital-twin",
+    "edge-ai"
+  ],
+  "author": "Reference implementation scaffold generated for GitHub publication",
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  }
+}
