@@ -288,4 +288,4 @@ git push -u origin main
 
 ## 14. Ghi công
 
-Dự án này là scaffold kỹ thuật để đóng gói CVNSS4.0 theo hướng codec/IR. Khi công bố công khai, hãy ghi rõ nguồn công thức CVNSS4.0 và kiểm tra quyền sử dụng rule table/converter legacy theo NOTICE.md.
+Dự án này là một scaffold kỹ thuật nhằm đóng gói CVNSS4.0 do Long Ngo phát triển theo hướng codec/IR, phục vụ nghiên cứu và thử nghiệm trong các lĩnh vực phần mềm, dữ liệu, NLP, AI biên, QR/NFC/RFID, GIS, Digital Twin và hệ thống định danh số. Dự án trân trọng ghi nhận và cảm ơn hai đồng tác giả Kiều Trường Lâm và Trần Tư Bình — nhóm tác giả công trình Chữ VN Song Song 4.0 — đã xây dựng, công bố và phổ biến hệ thống công thức CVNSS4.0. Khi công bố công khai, tái sử dụng hoặc phát triển tiếp, người dùng cần ghi rõ nguồn công thức CVNSS4.0, đồng thời kiểm tra quyền sử dụng đối với rule table, tài liệu gốc và converter legacy theo nội dung trong NOTICE.md.
